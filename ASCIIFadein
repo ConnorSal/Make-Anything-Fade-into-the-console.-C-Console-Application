@@ -1,0 +1,74 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    static void Main()
+    {
+        Console.CursorVisible = false; //hides the blinking text cursor
+        Console.Clear(); //clears the console before drawing anything
+
+        //ASCII art is stored as an array of strings, each string is one line
+        string[] asciiArt = new string[]
+        {
+          "▄▄▄▄▄▄▄                               ▄▄                   ▀      ▀           ▄    ▄                    ",
+          "   █    ▄   ▄  ▄▄▄▄    ▄▄▄            ██    ▄▄▄    ▄▄▄   ▄▄▄    ▄▄▄           █    █  ▄▄▄    ▄ ▄▄   ▄▄▄  ",
+          "   █    ▀▄ ▄▀  █▀ ▀█  █▀  █          █  █  █   ▀  █▀  ▀    █      █           █▄▄▄▄█ █▀  █   █▀  ▀ █▀  █  ",
+          "   █     █▄█   █   █  █▀▀▀▀          █▄▄█   ▀▀▀▄  █        █      █           █    █ █▀▀▀▀   █     █▀▀▀▀   ",
+          "   █     ▀█    ██▄█▀  ▀█▄▄▀         █    █ ▀▄▄▄▀  ▀█▄▄▀  ▄▄█▄▄  ▄▄█▄▄         █    █ ▀█▄▄▀   █     ▀█▄▄▀    ",
+          "         ▄▀    █                                                                                             ",
+          "        ▀▀     ▀                                                                                              ",
+        };
+
+        //call fade in effect function with 6 fade steps and 80ms delay between frames
+        FadeIn(asciiArt, fadeSteps: 6, frameDelay: 80);
+
+        Console.ResetColor(); //reset the console text color to default
+        Console.SetCursorPosition(0, asciiArt.Length + 2); //move cursor below art
+        Console.WriteLine("Press any key to exit..."); //input the final message
+        Console.ReadKey(true); //wait for key press before closing
+    }
+
+    //FadeIn draws the ASCII art gradually brighter with each frame
+    static void FadeIn(string[] art, int fadeSteps, int frameDelay)
+    {
+        //array of colors used for the fade effect
+        ConsoleColor[] fadeColors = new ConsoleColor[]
+        {
+            ConsoleColor.DarkGray,
+            ConsoleColor.Gray,
+            ConsoleColor.White
+        };
+
+        //loop for each fade step
+        for (int step = 0; step < fadeSteps; step++)
+        {
+            Console.SetCursorPosition(0, 0); //reset cursor to top left to redraw over previous frame
+
+            //pick color depending on step progress
+            ConsoleColor color = fadeColors[Math.Min(step * fadeColors.Length / fadeSteps, fadeColors.Length - 1)];
+            Console.ForegroundColor = color; //apply fade color to text
+
+            //loop through each line of art
+            foreach (var line in art)
+            {
+                string displayed = ""; //temporary string for partially revealed line
+                Random r = new Random(); //new random generator each frame
+                foreach (char c in line) //loop through each character
+                {
+                    if (char.IsWhiteSpace(c)) displayed += " "; //keep spaces as spaces
+                    else displayed += (r.NextDouble() < (double)step / fadeSteps) ? c : " "; //randomly show or hide character based on fade progress
+                }
+                Console.WriteLine(displayed); //print partially visible line
+            }
+
+            Thread.Sleep(frameDelay); //pause before next frame for animation effect
+        }
+
+        //after fade steps complete, print full white art
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.SetCursorPosition(0, 0);
+        foreach (var line in art)
+            Console.WriteLine(line);
+    }
+}
